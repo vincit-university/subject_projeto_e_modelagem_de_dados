@@ -1,0 +1,177 @@
+<div *ngIf="status"
+     class="alert text-center" 
+     [ngClass]="{'alert-success' : status == 'Salvo com sucesso!', 'alert-warning' : status == 'Processando ...'}"
+     role="alert">
+    {{status}}
+  </div>
+<div class="card">
+    <div class="card-header">
+        Formulário Pedidos
+    </div>
+    <div class="card-body">
+        <div class="form-group">
+            <div class="row mb-3 justify-content-end">
+                <div *ngIf="model.id" class="col-2">
+                    <label for="field-id" class="form-label">Código</label>
+                    <input type="text" class="form-control" id="field-id" [value]="model.id">
+                </div>
+                <div class="col-7"></div>
+                <div class="col-3">
+                    <label for="field-data-emissao" class="form-label">Data Emissão</label>
+                    <input type="date" class="form-control" id="field-data-emissao" [value]="model.dataEmissao | date:'yyyy-MM-dd'" readonly>
+                </div>
+            </div>
+            <div class="row mb-3">
+                <div class="col-2">
+                    <label for="field-cliente-cod" class="form-label">Cliente Cód.</label>
+                    <input type="text" class="form-control" id="field-cliente-cod" [value]="model.cliente?.id" disabled>
+                </div>
+                <div class="col-1 align-self-end">
+                    <button class="btn btn-primary w-100" (click)="listarClientes(modalCliente)">...</button>
+                </div>
+                <div class="col-9">
+                    <label for="field-cliente-nome" class="form-label">Cliente</label>
+                    <input type="text" class="form-control" id="field-cliente-nome" [value]="model.cliente?.nome" disabled>
+                </div>
+            </div>
+
+            <div class="accordion" id="accordionExample">
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="headingOne">
+                        <button class="accordion-button" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                            Itens do Pedido
+                        </button>
+                    </h2>
+                    <div id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="headingOne"
+                        data-bs-parent="#accordionExample">
+                        <div class="accordion-body">
+                            <div class="row mb-3">
+                                <div class="col-2">
+                                    <label for="field-produto-cod" class="form-label">Produto Cód.</label>
+                                    <input type="text" class="form-control" id="field-produto-cod" [value]="produtoSelecionado?.id" disabled>
+                                </div>
+                                <div class="col-1 align-self-end">
+                                    <button class="btn btn-primary w-100" (click)="listarProdutos(modalProduto)">...</button>
+                                </div>
+                                <div class="col-6">
+                                    <label for="field-produto-descricao" class="form-label">Produto</label>
+                                    <input type="text" class="form-control" id="field-produto-descricao" [value]="produtoSelecionado?.descricao" disabled>
+                                </div>
+                                <div class="col-2">
+                                    <label for="field-produto-quantidade" class="form-label">Quantidade</label>
+                                    <input type="number" class="form-control" id="field-produto-quantidade" [(ngModel)]="produtoQuantidade">
+                                </div>
+                                <div class="col-1 align-self-end">
+                                    <button class="btn btn-success w-100" (click)="incluirProduto()">+</button>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th scope="col" class="col-2">Produto Cód.</th>
+                                            <th scope="col" class="col-8">Descrição</th>
+                                            <th scope="col" class="col-1">Quantidade</th>
+                                            <th scope="col" class="col-1 text-center">Ações</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr *ngFor="let pedidoProduto of model.pedidoProdutos">
+                                            <th scope="row" class="align-middle">{{pedidoProduto.produto?.id}}</th>
+                                            <td class="align-middle">{{pedidoProduto.produto?.descricao}}</td>
+                                            <td class="align-middle">{{pedidoProduto.quantidade}}</td>
+                                            <td class="text-center align-middle">
+                                                <button class="btn btn-danger w-100" (click)="removerProduto(pedidoProduto)">-</button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row mb-3 justify-content-end mt-3">
+                <div class="col-3">
+                    <label for="field-telefone" class="form-label">Total do Pedido</label>
+                    <input type="text" class="form-control" id="field-telefone" [value]="model.totalPedido | currency: 'BRL'" readonly>
+                </div>
+            </div>
+
+            <div class="row mt-3">
+                <div class="col-12 d-flex justify-content-end">
+                    <button class="btn btn-success mr-1" (click)="salvarPedido()">Salvar</button>
+                    <button class="btn btn-danger" [routerLink]="['/pedidos']">Cancelar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!--Modal Clientes-->
+<ng-template #modalCliente let-modalCliente>
+    <div class="modal-header">
+        <h4 class="modal-title" id="modal-basic-title">Selecione um Cliente</h4>
+        <button #btnClienteClose type="button" class="btn-close" aria-label="Close" (click)="modalCliente.dismiss('Cross click')"></button>
+    </div>
+    <div class="modal-body">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th scope="col" class="col-1">Código</th>
+                    <th scope="col" class="col-3">Nome</th>
+                    <th scope="col" class="col-2">Telefone</th>
+                    <th scope="col" class="col-3">Endereço</th>
+                    <th scope="col" class="col-2 text-center"></th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let cliente of clientes">
+                    <th scope="row" class="align-middle">{{cliente.id}}</th>
+                    <td class="align-middle">{{cliente.nome}}</td>
+                    <td class="align-middle">{{cliente.telefone}}</td>
+                    <td class="align-middle">{{cliente.endereco}}</td>
+                    <td class="text-center align-middle">
+                        <button class="btn btn-primary mr-1" (click)="selecionarCliente(cliente, btnClienteClose)">Selecionar</button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</ng-template>
+
+<!--Modal Produtos-->
+<ng-template #modalProduto let-modalProduto>
+    <div class="modal-header">
+        <h4 class="modal-title" id="modal-basic-title">Selecione um Produto</h4>
+        <button #btnProdutoClose type="button" class="btn-close" aria-label="Close" (click)="modalProduto.dismiss('Cross click')"></button>
+    </div>
+    <div class="modal-body">
+        <table class="table table-hover">
+            <thead>
+              <tr>
+                <th scope="col" class="col-1">Código</th>
+                <th scope="col" class="col-4">Descrição</th>
+                <th scope="col" class="col-2">Unidade</th>
+                <th scope="col" class="col-2">Preço</th>
+                <th scope="col" class="col-2 text-center">Ações</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let produto of produtos">
+                <th scope="row" class="align-middle">{{produto.id}}</th>
+                <td class="align-middle">{{produto.descricao}}</td>
+                <td class="align-middle">{{produto.unidade}}</td>
+                <td class="align-middle">{{produto.preco | currency: 'BRL'}}</td>
+                <td class="text-center align-middle">
+                  <button class="btn btn-primary mr-1" (click)="selecionarProduto(produto, btnProdutoClose)">Selecionar</button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+    </div>
+</ng-template>
